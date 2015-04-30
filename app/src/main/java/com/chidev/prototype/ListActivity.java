@@ -7,18 +7,56 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
-public class ListActivity extends ActionBarActivity {
+public class ListActivity extends ActionBarActivity implements ItemFragment.OnFragmentInteractionListener {
 
     public final static String EXTRA_MESSAGE = "com.chidev.prototype.MESSAGE";
+    private String unsubmittedText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // SEt the user interface layout for this activity
         setContentView(R.layout.activity_list);
+
+        // Get lists from database/file and preload into variables
+
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.list_item, new ItemFragment())
+                    .commit();
+        }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        EditText editText = (EditText) findViewById(R.id.edit_message);
+        unsubmittedText = editText.getText().toString();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (unsubmittedText != "") {
+            EditText editText = (EditText) findViewById(R.id.edit_message);
+            editText.setText(unsubmittedText);
+            unsubmittedText = "";
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Save list to database/file
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -50,5 +88,9 @@ public class ListActivity extends ActionBarActivity {
         String message = editText.getText().toString();
         intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
+    }
+
+    public void onFragmentInteraction(String itemDescription) {
+        Toast.makeText(this, itemDescription + " Clicked!", Toast.LENGTH_SHORT).show();
     }
 }
