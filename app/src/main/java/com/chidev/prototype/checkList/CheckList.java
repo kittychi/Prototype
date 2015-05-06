@@ -12,7 +12,7 @@ public class CheckList implements Parcelable {
     private String listTitle;
     private ArrayList<CheckListItem> items;
 
-    public CheckList() {
+    private CheckList() {
     }
 
     public CheckList(String title) {

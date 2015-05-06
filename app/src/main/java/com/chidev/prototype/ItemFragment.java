@@ -33,8 +33,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String CHECK_LIST_NAME = "checkListName";
 
-    private String checkListName;
-
     private OnFragmentInteractionListener mListener;
 
     /**
@@ -71,7 +69,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
 
         if (getArguments() != null) {
-            checkListName = getArguments().getString(CHECK_LIST_NAME);
+            String checkListName = getArguments().getString(CHECK_LIST_NAME);
 
             // use the checklist name to get items on list
             CheckList list = getArguments().getParcelable(checkListName);
@@ -159,7 +157,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(String interationType, String itemDescription, int position);
+        public void onFragmentInteraction(String interactionType, String itemDescription, int position);
     }
 
 }

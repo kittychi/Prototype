@@ -23,7 +23,7 @@ public class CheckListItem implements Parcelable {
     // date formatted string MMM-DD-YYYY
     private String completedDate;
 
-    private String dateFormat = "MMM-dd-yyyy";
+    private final String dateFormat = "MMM-dd-yyyy";
     public CheckListItem() {
     }
 

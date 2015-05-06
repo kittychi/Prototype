@@ -18,7 +18,6 @@ import java.util.List;
  */
 public class CheckListItemAdapter extends ArrayAdapter {
     private Context context;
-    private boolean useList = true;
 
     public CheckListItemAdapter(Context context, List items){
         super(context, android.R.layout.simple_list_item_1, items);
@@ -40,6 +39,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
         LayoutInflater mInflater = (LayoutInflater) context
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
+            boolean useList = true;
             if(useList){
                 viewToUse = mInflater.inflate(R.layout.checklist_list_item, null);
             } else {
