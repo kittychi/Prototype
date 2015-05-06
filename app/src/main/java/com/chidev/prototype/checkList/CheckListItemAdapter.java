@@ -31,9 +31,9 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        ViewHolder holder = null;
+        ViewHolder holder;
         CheckListItem item = (CheckListItem)getItem(position);
-        View viewToUse = null;
+        View viewToUse;
 
         // This block exists to inflate the settings list item conditionally based on whether
         // we want to support a grid or list view.
@@ -54,7 +54,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
             holder = (ViewHolder) viewToUse.getTag();
         }
 
-        holder.titleText.setText(item.getDescription());
+        holder.titleText.setText(item.getItem());
         return viewToUse;
     }
 }

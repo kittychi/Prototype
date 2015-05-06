@@ -1,52 +1,98 @@
 package com.chidev.prototype.checkList;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Created by Christy on 2015-04-19.
  */
-public class CheckListItem {
-    private boolean completed;
-    private String description="";
+public class CheckListItem implements Parcelable {
 
-    private Date createdDate;
-    private Date completedDate;
+    // status: { incomplete, complete w/o picture, complete w/ picture }
+    private int status;
+
+    //
+    private String item ="";
+
+    // date formatted string MMM-DD-YYYY
+    private String createdDate;
+
+    // date formatted string MMM-DD-YYYY
+    private String completedDate;
+
+    private String dateFormat = "MMM-dd-yyyy";
+    public CheckListItem() {
+    }
 
     public CheckListItem(String item) {
-        this.description = item;
-        completed = false;
-        createdDate = new Date();
+        this.item = item;
+        status = 0;
+        createdDate = new SimpleDateFormat(dateFormat).format(new Date());
     }
 
     public void markCompleted() {
-        this.completed = true;
-        completedDate = new Date();
+        status = 1;
+        completedDate =  new SimpleDateFormat(dateFormat).format(new Date());
     }
 
     public void markIncomplete() {
-        this.completed = false;
+        status = 0;
         completedDate = null;
     }
 
-    public void setDescription(String item) {
-        this.description = item;
+    public void setItem(String item) {
+        this.item = item;
     }
 
-    public String getDescription() {
-        return this.description;
+    public String getItem() {
+        return this.item;
     }
 
-    public boolean isCompleted() {
-        return this.completed;
+    public int getStatus() {
+        return this.status;
     }
 
-    public Date getCompletedDate() {
+    public String getCompletedDate() {
         return this.completedDate;
     }
 
-    public Date getCreatedDate() {
+    public String getCreatedDate() {
         return this.createdDate;
     }
 
+    public static final Parcelable.Creator<CheckListItem> CREATOR;
+    static {
+        CREATOR = new Creator<CheckListItem>() {
+            public CheckListItem createFromParcel(Parcel source) {
+                CheckListItem mItem = new CheckListItem();
+                mItem.item = source.readString();
+                mItem.status = source.readInt();
+                mItem.createdDate = source.readString();
+                mItem.completedDate = source.readString();
+
+                return mItem;
+            }
+
+            public CheckListItem[] newArray(int size) {
+                return new CheckListItem[size];
+            }
+        };
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(item);
+        dest.writeInt(status);
+        dest.writeString(createdDate);
+        dest.writeString(completedDate);
+    }
 }
 
