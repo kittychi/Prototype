@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -48,19 +50,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     private List checkListItems;
 
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
+    public ItemFragment() {
+    }
+
     public static ItemFragment newInstance(String checkListName) {
         ItemFragment fragment = new ItemFragment();
         Bundle args = new Bundle();
         args.putString(CHECK_LIST_NAME, checkListName);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public ItemFragment() {
     }
 
     @Override
@@ -112,7 +114,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListener = null;
     }
 
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
@@ -123,14 +124,30 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) {
-            mListener.onFragmentInteraction("delete", "", position);
-            mAdapter.notifyDataSetChanged();
-            return true;
+        if (view instanceof LinearLayout) {
+            RelativeLayout editLayout = (RelativeLayout) view.findViewById(R.id.edit_layout);
+
+            if (null != mListener && editLayout.getVisibility() != View.VISIBLE) {
+
+                TextView txtView = (TextView) view.findViewById(R.id.titleTextView);
+                txtView.setVisibility(View.GONE);
+                editLayout.setVisibility(View.VISIBLE);
+
+//                EditText editView = (EditText) view.findViewById(R.id.edit_item_text);
+//                editView.requestFocus();
+//            mListener.onFragmentInteraction("delete", "", position);
+//            mAdapter.notifyDataSetChanged();
+                return true;
+            }
         }
         return false;
+    }
+
+    public ArrayAdapter getAdapter() {
+        return mAdapter;
     }
 
     /**

@@ -5,6 +5,9 @@
     <string name="edit_message">Enter a task!</string>
     <string name="button_send">Add</string>
     <string name="title_activity_display_message">My Message</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="delete_button">Delete</string>
 
     <string name="hello_world">Hello world!</string>
 </resources>

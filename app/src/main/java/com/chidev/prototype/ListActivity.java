@@ -1,5 +1,6 @@
 package com.chidev.prototype;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -131,7 +132,10 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
         String task = editText.getText().toString();
 
         myCheckList.addItem(task);
+
         editText.setText(unsubmittedText);
+        ItemFragment itemFrag = (ItemFragment) getFragmentManager().findFragmentById(R.id.list_item);
+        itemFrag.getAdapter().notifyDataSetChanged();
 
         // hide virtual keyboard
         InputMethodManager imm =
