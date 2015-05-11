@@ -124,7 +124,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
-
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         if (view instanceof LinearLayout) {

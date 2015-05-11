@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.chidev.prototype.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,10 +23,12 @@ import java.util.List;
  */
 public class CheckListItemAdapter extends ArrayAdapter {
     private Context context;
+    ArrayList<CheckListItem> items;
 
     public CheckListItemAdapter(Context context, List items){
         super(context, android.R.layout.simple_list_item_1, items);
         this.context = context;
+        this.items = (ArrayList) items;
     }
 
     private class ViewHolder{
@@ -56,7 +59,17 @@ public class CheckListItemAdapter extends ArrayAdapter {
                 holder.deleteBtn = (Button) viewToUse.findViewById(R.id.delete_button);
                 holder.editLayout = (RelativeLayout) viewToUse.findViewById(R.id.edit_layout);
                 holder.editText = (EditText) viewToUse.findViewById(R.id.edit_item_text);
-                holder.editText.setHint(item.getItem());
+                holder.editText.setText(item.getItem());
+
+                holder.editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        if (hasFocus) {
+                            Log.d("editTextChangeFocus", "editText focused");
+                        } else Log.d("editTextChangeFocus", "editText lost focus");
+                    }
+                });
                 initButtons(position, viewToUse, holder);
 
             } else viewToUse = mInflater.inflate(R.layout.checklist_grid_item, null);
@@ -96,6 +109,9 @@ public class CheckListItemAdapter extends ArrayAdapter {
             super.onClick(v);
             Log.d("ItemSaveBtn", "Save button clicked for item " + position);
 
+            CheckListItem item = items.get(position);
+            item.setItem(super.holder.editText.getText().toString());
+            notifyDataSetChanged();
         }
     }
 
@@ -107,9 +123,9 @@ public class CheckListItemAdapter extends ArrayAdapter {
         }
 
         public void onClick(View v) {
+            super.holder.editText.setText(super.holder.titleText.getText().toString());
             super.onClick(v);
             Log.d("ItemCancelBtn", "Cancel button clicked for item " + position);
-
         }
     }
 
@@ -123,6 +139,8 @@ public class CheckListItemAdapter extends ArrayAdapter {
             @Override
             public void onClick(View v){
                 Log.d("ItemDeleteBtn", "Delete button clicked for item " + position);
+                items.remove(position);
+                notifyDataSetChanged();
             }
         });
     }
