@@ -31,7 +31,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
         this.items = (ArrayList) items;
     }
 
-    private class ViewHolder{
+    public class CheckListItemViewHolder {
         TextView titleText;
         Button saveBtn, cancelBtn, deleteBtn;
         RelativeLayout editLayout;
@@ -40,7 +40,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        ViewHolder holder;
+        CheckListItemViewHolder holder;
         CheckListItem item = (CheckListItem)getItem(position);
         View viewToUse;
 
@@ -50,7 +50,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             boolean useList = true;
-            holder = new ViewHolder();
+            holder = new CheckListItemViewHolder();
 
             if(useList){
                 viewToUse = mInflater.inflate(R.layout.checklist_list_item, null);
@@ -71,6 +71,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
                     }
                 });
                 initButtons(position, viewToUse, holder);
+                holder.editLayout.setVisibility(View.GONE);
 
             } else viewToUse = mInflater.inflate(R.layout.checklist_grid_item, null);
 
@@ -78,7 +79,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
             viewToUse.setTag(holder);
         } else {
             viewToUse = convertView;
-            holder = (ViewHolder) viewToUse.getTag();
+            holder = (CheckListItemViewHolder) viewToUse.getTag();
         }
 
         holder.titleText.setText(item.getItem());
@@ -86,9 +87,9 @@ public class CheckListItemAdapter extends ArrayAdapter {
     }
 
     private class OnButtonClickListener implements View.OnClickListener {
-        private ViewHolder holder;
+        private CheckListItemViewHolder holder;
 
-        public OnButtonClickListener(ViewHolder holder) {
+        public OnButtonClickListener(CheckListItemViewHolder holder) {
             this.holder = holder;
         }
         @Override
@@ -100,7 +101,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
     private class OnSaveButtonClickListener extends OnButtonClickListener {
         private int position;
-        public OnSaveButtonClickListener(ViewHolder holder, int position) {
+        public OnSaveButtonClickListener(CheckListItemViewHolder holder, int position) {
             super(holder);
             this.position = position;
         }
@@ -117,7 +118,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
     private class OnCancelButtonClickListener extends OnButtonClickListener {
         private int position;
-        public OnCancelButtonClickListener(ViewHolder holder, int position) {
+        public OnCancelButtonClickListener(CheckListItemViewHolder holder, int position) {
             super(holder);
             this.position = position;
         }
@@ -129,7 +130,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
         }
     }
 
-    private void initButtons(final int position, View viewToUse, ViewHolder holder) {
+    private void initButtons(final int position, View viewToUse, CheckListItemViewHolder holder) {
 
         holder.saveBtn.setOnClickListener(new OnSaveButtonClickListener(holder, position));
 

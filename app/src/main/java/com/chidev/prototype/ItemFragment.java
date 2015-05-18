@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import com.chidev.prototype.checkList.CheckList;
 import com.chidev.prototype.checkList.CheckListItem;
 import com.chidev.prototype.checkList.CheckListItemAdapter;
+import com.chidev.prototype.library.SwipeDetector;
 
 import java.util.List;
 
@@ -50,6 +50,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     private List checkListItems;
 
+    private SwipeDetector swipeDetector;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -77,7 +78,9 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             CheckList list = getArguments().getParcelable(checkListName);
             checkListItems = list.getItems();
 
-            mAdapter = new CheckListItemAdapter(getActivity(), checkListItems);
+            mAdapter =  new CheckListItemAdapter(getActivity(), checkListItems);
+
+
         }
 
     }
@@ -92,6 +95,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
+        swipeDetector = new SwipeDetector();
+        mListView.setOnTouchListener(swipeDetector);
         mListView.setOnItemClickListener(this);
         mListView.setOnItemLongClickListener(this);
         return view;
@@ -116,29 +121,28 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            CheckListItem item = (CheckListItem) this.checkListItems.get(position);
-            mListener.onFragmentInteraction("detail", item.getItem(), position);
+        RelativeLayout editLayout = (RelativeLayout) view.findViewById(R.id.edit_layout);
+
+        if (null != mListener && editLayout.getVisibility() != View.VISIBLE) {
+            if (swipeDetector.swipeDetected()){
+                CheckListItem item = (CheckListItem) this.checkListItems.get(position);
+                mListener.onFragmentInteraction("swiped", item.getItem(), position);
+            } else {
+                TextView txtView = (TextView) view.findViewById(R.id.titleTextView);
+                txtView.setVisibility(View.GONE);
+                editLayout.setVisibility(View.VISIBLE);
+            }
         }
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         if (view instanceof LinearLayout) {
-            RelativeLayout editLayout = (RelativeLayout) view.findViewById(R.id.edit_layout);
-
-            if (null != mListener && editLayout.getVisibility() != View.VISIBLE) {
-
-                TextView txtView = (TextView) view.findViewById(R.id.titleTextView);
-                txtView.setVisibility(View.GONE);
-                editLayout.setVisibility(View.VISIBLE);
-
-//                EditText editView = (EditText) view.findViewById(R.id.edit_item_text);
-//                editView.requestFocus();
-//            mListener.onFragmentInteraction("delete", "", position);
-//            mAdapter.notifyDataSetChanged();
+            if (null != mListener) {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                CheckListItem item = (CheckListItem) this.checkListItems.get(position);
+                mListener.onFragmentInteraction("detail", item.getItem(), position);
                 return true;
             }
         }

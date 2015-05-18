@@ -149,11 +149,10 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
                 CheckListItem item = myCheckList.getItem(position);
                 Toast.makeText(this, item.getItem() + " Clicked!", Toast.LENGTH_SHORT).show();
                 break;
-            case "delete":
-                myCheckList.removeItem(position);
+            case "swiped":
+                Toast.makeText(this, itemDescription + " Swiped", Toast.LENGTH_SHORT).show();
                 break;
             default:
-                break;
         }
 
     }
