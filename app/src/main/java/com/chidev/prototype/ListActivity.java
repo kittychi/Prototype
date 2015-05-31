@@ -1,21 +1,20 @@
 package com.chidev.prototype;
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chidev.prototype.checkList.CheckList;
 import com.chidev.prototype.checkList.CheckListItem;
+import com.chidev.prototype.checkList.CheckListItemAdapter;
 
 
 public class ListActivity extends ActionBarActivity implements ItemFragment.OnFragmentInteractionListener {
@@ -24,6 +23,7 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
     private String unsubmittedText;
 
     private CheckList myCheckList;
+    private ItemFragment mFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,32 +39,13 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
             Bundle bundle = new Bundle();
             bundle.putString("checkListName", myCheckList.getListTitle());
             bundle.putParcelable(myCheckList.getListTitle(), myCheckList);
-            ItemFragment items = new ItemFragment();
-            items.setArguments(bundle);
+            mFragment = new ItemFragment();
+            mFragment.setArguments(bundle);
             getFragmentManager().beginTransaction()
-                    .add(R.id.list_item, items)
+                    .add(R.id.list_item, mFragment)
                     .commit();
         }
 
-        final EditText editText = (EditText) findViewById(R.id.edit_message);
-
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int keyCode,
-                                          KeyEvent event) {
-                if ( (event.getAction() == KeyEvent.ACTION_DOWN  ) &&
-                        (keyCode           == KeyEvent.KEYCODE_ENTER)   )
-                {
-                    // hide virtual keyboard
-                    InputMethodManager imm =
-                            (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -116,7 +97,9 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
         return super.onOptionsItemSelected(item);
     }
 
-    /** Opens new view and display the message entered */
+    /**
+     * Opens new view and display the message entered
+     */
     public void sendMessage(View view) {
         //Do something in response to button
         Intent intent = new Intent(this, DisplayMessageActivity.class);
@@ -126,7 +109,9 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
         startActivity(intent);
     }
 
-    /** Creates a task with the description entered and refreshes the list**/
+    /**
+     * Creates a task with the description entered and refreshes the list*
+     */
     public void createTask(View view) {
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String task = editText.getText().toString();
@@ -139,7 +124,7 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
 
         // hide virtual keyboard
         InputMethodManager imm =
-                (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
@@ -154,6 +139,39 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
                 break;
             default:
         }
+
+    }
+
+    public void updateItemDescription(int position, String newDescription) {
+        CheckListItem item = myCheckList.getItem(position);
+        item.setItem(newDescription);
+        ((CheckListItemAdapter) mFragment.getAdapter()).updateItems(myCheckList.getItems());
+    }
+
+    public void removeItem(int position) {
+        myCheckList.removeItem(position);
+        ((CheckListItemAdapter) mFragment.getAdapter()).updateItems(myCheckList.getItems());
+    }
+
+    public void itemFragmentSaveItemOnClickHandler(View view) {
+        mFragment.saveItemOnClickHandler(view);
+    }
+
+    public void itemFragmentCancelItemOnClickHandler(View view) {
+        mFragment.cancelItemOnClickHandler(view);
+    }
+
+    public void itemFragmentDeleteItemOnClickHandler(View view) {
+        mFragment.deleteItemOnClickHandler(view);
+    }
+
+    public void itemOnFlingHandler(boolean isCompleted, int position) {
+        CheckListItem item = myCheckList.getItem(position);
+        Log.d("OnFlingHandler", "item status before" + item.getStatus().name());
+        if (isCompleted) item.markCompleted();
+        else item.markIncomplete();
+        Log.d("OnFlingHandler", "item status after " + item.getStatus().name());
+        ((CheckListItemAdapter) mFragment.getAdapter()).updateItems(myCheckList.getItems());
 
     }
 }

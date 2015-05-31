@@ -11,8 +11,13 @@ import java.util.Date;
  */
 public class CheckListItem implements Parcelable {
 
+    public enum ItemStatus {
+        INCOMPLETE,
+        COMPLETE,
+        COMPLETEWPICS
+    }
     // status: { incomplete, complete w/o picture, complete w/ picture }
-    private int status;
+    private ItemStatus status;
 
     //
     private String item ="";
@@ -29,17 +34,17 @@ public class CheckListItem implements Parcelable {
 
     public CheckListItem(String item) {
         this.item = item;
-        status = 0;
+        status = ItemStatus.INCOMPLETE;
         createdDate = new SimpleDateFormat(dateFormat).format(new Date());
     }
 
     public void markCompleted() {
-        status = 1;
+        status = ItemStatus.COMPLETE;
         completedDate =  new SimpleDateFormat(dateFormat).format(new Date());
     }
 
     public void markIncomplete() {
-        status = 0;
+        status = ItemStatus.INCOMPLETE;
         completedDate = null;
     }
 
@@ -51,7 +56,7 @@ public class CheckListItem implements Parcelable {
         return this.item;
     }
 
-    public int getStatus() {
+    public ItemStatus getStatus() {
         return this.status;
     }
 
@@ -69,7 +74,7 @@ public class CheckListItem implements Parcelable {
             public CheckListItem createFromParcel(Parcel source) {
                 CheckListItem mItem = new CheckListItem();
                 mItem.item = source.readString();
-                mItem.status = source.readInt();
+                mItem.status = ItemStatus.valueOf(source.readString());
                 mItem.createdDate = source.readString();
                 mItem.completedDate = source.readString();
 
@@ -90,7 +95,7 @@ public class CheckListItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(item);
-        dest.writeInt(status);
+        dest.writeString(status.name());
         dest.writeString(createdDate);
         dest.writeString(completedDate);
     }

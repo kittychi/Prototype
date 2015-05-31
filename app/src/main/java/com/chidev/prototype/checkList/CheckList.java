@@ -75,4 +75,12 @@ public class CheckList implements Parcelable {
 
         dest.writeString(listTitle);
     }
+
+    public void set(int position, CheckListItem item) {
+        this.items.set(position, item);
+    }
+
+    public CheckListItem get(int position) {
+        return this.items.get(position);
+    }
 }

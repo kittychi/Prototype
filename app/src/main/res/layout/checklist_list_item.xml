@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/item_container"
     android:weightSum="1">
 
     <TextView
@@ -49,7 +50,9 @@
                     android:id="@+id/save_button"
                     android:visibility="visible"
                     android:layout_column="0"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="itemFragmentSaveItemOnClickHandler" />
+
 
                 <Button
                     android:layout_width="wrap_content"
@@ -58,7 +61,8 @@
                     android:id="@+id/cancel_button"
                     android:layout_gravity="center_horizontal"
                     android:visibility="visible"
-                    android:layout_column="1"/>
+                    android:layout_column="1"
+                    android:onClick="itemFragmentCancelItemOnClickHandler" />
 
                 <Button
                 style="?android:attr/buttonStyleSmall"
@@ -68,7 +72,8 @@
                 android:id="@+id/delete_button"
                 android:layout_gravity="center_horizontal"
                 android:visibility="visible"
-                android:layout_column="2" />
+                    android:layout_column="2"
+                    android:onClick="itemFragmentDeleteItemOnClickHandler" />
 
             </TableRow>
         </TableLayout>

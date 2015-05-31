@@ -2,16 +2,23 @@ package com.chidev.prototype.checkList;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Paint;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.chidev.prototype.ItemFragment;
+import com.chidev.prototype.ListActivity;
 import com.chidev.prototype.R;
 
 import java.util.ArrayList;
@@ -24,24 +31,40 @@ import java.util.List;
 public class CheckListItemAdapter extends ArrayAdapter {
     private Context context;
     ArrayList<CheckListItem> items;
+    ItemFragment mFragment;
 
-    public CheckListItemAdapter(Context context, List items){
+    public CheckListItemAdapter(Context context, List items, ItemFragment fragment) {
         super(context, android.R.layout.simple_list_item_1, items);
         this.context = context;
         this.items = (ArrayList) items;
+        mFragment = fragment;
     }
 
     public class CheckListItemViewHolder {
-        TextView titleText;
+        LinearLayout itemContainer;
+        public TextView titleText;
+        public RelativeLayout editLayout;
+        public EditText editText;
         Button saveBtn, cancelBtn, deleteBtn;
-        RelativeLayout editLayout;
-        EditText editText;
+
+        public int position;
+        GestureDetectorCompat mDetector;
+
+        public void editModeOn() {
+            editLayout.setVisibility(View.VISIBLE);
+            titleText.setVisibility(View.GONE);
+        }
+
+        public void editModeOff() {
+            editLayout.setVisibility(View.GONE);
+            titleText.setVisibility(View.VISIBLE);
+        }
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        CheckListItemViewHolder holder;
-        CheckListItem item = (CheckListItem)getItem(position);
+        final CheckListItemViewHolder holder;
+        CheckListItem item = getItem(position);
         View viewToUse;
 
         // This block exists to inflate the settings list item conditionally based on whether
@@ -55,8 +78,11 @@ public class CheckListItemAdapter extends ArrayAdapter {
             if(useList){
                 viewToUse = mInflater.inflate(R.layout.checklist_list_item, null);
                 holder.saveBtn = (Button)viewToUse.findViewById(R.id.save_button);
+                holder.saveBtn.setTag(holder);
                 holder.cancelBtn = (Button) viewToUse.findViewById(R.id.cancel_button);
+                holder.cancelBtn.setTag(holder);
                 holder.deleteBtn = (Button) viewToUse.findViewById(R.id.delete_button);
+                holder.deleteBtn.setTag(holder);
                 holder.editLayout = (RelativeLayout) viewToUse.findViewById(R.id.edit_layout);
                 holder.editText = (EditText) viewToUse.findViewById(R.id.edit_item_text);
                 holder.editText.setText(item.getItem());
@@ -70,12 +96,33 @@ public class CheckListItemAdapter extends ArrayAdapter {
                         } else Log.d("editTextChangeFocus", "editText lost focus");
                     }
                 });
-                initButtons(position, viewToUse, holder);
                 holder.editLayout.setVisibility(View.GONE);
 
             } else viewToUse = mInflater.inflate(R.layout.checklist_grid_item, null);
-
+            holder.position = position;
             holder.titleText = (TextView)viewToUse.findViewById(R.id.titleTextView);
+            holder.itemContainer = (LinearLayout) viewToUse.findViewById(R.id.item_container);
+            holder.mDetector = new GestureDetectorCompat(context, new ItemOnGestureListener(context, convertView, holder, position));
+
+            holder.itemContainer.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    boolean retVal = holder.mDetector.onTouchEvent(event);
+//                    Log.d("TouchListener", "item " + items.get(position).getItem() +  " is " + items.get(position).getStatus().name());
+                    return retVal;
+                }
+            });
+            if (item.getStatus() != CheckListItem.ItemStatus.INCOMPLETE) {
+
+                Log.d("getView", "before: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
+                holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                Log.d("getView", "after: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
+            } else {
+
+                Log.d("getView", "before: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
+                holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                Log.d("getView", "after: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
+            }
             viewToUse.setTag(holder);
         } else {
             viewToUse = convertView;
@@ -86,63 +133,61 @@ public class CheckListItemAdapter extends ArrayAdapter {
         return viewToUse;
     }
 
-    private class OnButtonClickListener implements View.OnClickListener {
-        private CheckListItemViewHolder holder;
+    public void updateItems(ArrayList checkList) {
+        items = checkList;
+    }
 
-        public OnButtonClickListener(CheckListItemViewHolder holder) {
-            this.holder = holder;
+    @Override
+    public CheckListItem getItem(int position) {
+        return items.get(position);
+    }
+
+    public class ItemOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        private static final int MIN_DISTANCE = 50;
+        CheckListItemAdapter.CheckListItemViewHolder itemHolder;
+
+        int position;
+        final String TAG = "GestureListener";
+        Context context;
+
+        public ItemOnGestureListener(Context ctx, View convertView, CheckListItemAdapter.CheckListItemViewHolder holder, int position) {
+            itemHolder = holder;
+            this.position = position;
+            context = ctx;
         }
+
         @Override
-        public void onClick(View v) {
-            holder.editLayout.setVisibility(View.GONE);
-            holder.titleText.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private class OnSaveButtonClickListener extends OnButtonClickListener {
-        private int position;
-        public OnSaveButtonClickListener(CheckListItemViewHolder holder, int position) {
-            super(holder);
-            this.position = position;
+        public boolean onDown(MotionEvent e) {
+            return true;
         }
 
-        public void onClick(View v) {
-            super.onClick(v);
-            Log.d("ItemSaveBtn", "Save button clicked for item " + position);
-
-            CheckListItem item = items.get(position);
-            item.setItem(super.holder.editText.getText().toString());
-            notifyDataSetChanged();
-        }
-    }
-
-    private class OnCancelButtonClickListener extends OnButtonClickListener {
-        private int position;
-        public OnCancelButtonClickListener(CheckListItemViewHolder holder, int position) {
-            super(holder);
-            this.position = position;
-        }
-
-        public void onClick(View v) {
-            super.holder.editText.setText(super.holder.titleText.getText().toString());
-            super.onClick(v);
-            Log.d("ItemCancelBtn", "Cancel button clicked for item " + position);
-        }
-    }
-
-    private void initButtons(final int position, View viewToUse, CheckListItemViewHolder holder) {
-
-        holder.saveBtn.setOnClickListener(new OnSaveButtonClickListener(holder, position));
-
-        holder.cancelBtn.setOnClickListener(new OnCancelButtonClickListener(holder, position));
-
-        holder.deleteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
-                Log.d("ItemDeleteBtn", "Delete button clicked for item " + position);
-                items.remove(position);
-                notifyDataSetChanged();
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            Log.v("TAG", "Single tap up " + getItem(itemHolder.position));
+            if (itemHolder.editLayout.getVisibility() == View.GONE) {
+                itemHolder.editModeOn();
+                return true;
             }
-        });
+            return false;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            float diffX = e2.getX() - e1.getX();
+            boolean completed;
+            if (Math.abs(diffX) > MIN_DISTANCE) {
+                completed = diffX > 0;
+                Log.d("OnFling", "completed " + completed);
+                Log.d("OnFling", "item " + itemHolder.titleText.getText().toString());
+                ((ListActivity) mFragment.getActivity()).itemOnFlingHandler(completed, position);
+
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }
