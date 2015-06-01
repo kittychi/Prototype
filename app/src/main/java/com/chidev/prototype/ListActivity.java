@@ -167,7 +167,7 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
 
     public void itemOnFlingHandler(boolean isCompleted, int position) {
         CheckListItem item = myCheckList.getItem(position);
-        Log.d("OnFlingHandler", "item status before" + item.getStatus().name());
+        Log.d("OnFlingHandler", "item status before " + item.getStatus().name());
         if (isCompleted) item.markCompleted();
         else item.markIncomplete();
         Log.d("OnFlingHandler", "item status after " + item.getStatus().name());

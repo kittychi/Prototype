@@ -59,6 +59,14 @@ public class CheckListItemAdapter extends ArrayAdapter {
             editLayout.setVisibility(View.GONE);
             titleText.setVisibility(View.VISIBLE);
         }
+
+        public void strikeItem(boolean strike) {
+            if (strike) {
+                titleText.setPaintFlags(titleText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                titleText.setPaintFlags(titleText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            }
+        }
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -112,17 +120,9 @@ public class CheckListItemAdapter extends ArrayAdapter {
                     return retVal;
                 }
             });
-            if (item.getStatus() != CheckListItem.ItemStatus.INCOMPLETE) {
+            boolean completed = item.getStatus() != CheckListItem.ItemStatus.INCOMPLETE;
+            holder.strikeItem(completed);
 
-                Log.d("getView", "before: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
-                holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                Log.d("getView", "after: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
-            } else {
-
-                Log.d("getView", "before: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
-                holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                Log.d("getView", "after: " + item.getItem() + " is " + item.getStatus().name() + " " + holder.titleText.getPaintFlags());
-            }
             viewToUse.setTag(holder);
         } else {
             viewToUse = convertView;
@@ -182,7 +182,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
                 Log.d("OnFling", "completed " + completed);
                 Log.d("OnFling", "item " + itemHolder.titleText.getText().toString());
                 ((ListActivity) mFragment.getActivity()).itemOnFlingHandler(completed, position);
-
+                itemHolder.strikeItem(completed);
                 return true;
             }
 
