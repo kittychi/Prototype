@@ -3,18 +3,14 @@ package com.chidev.prototype;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chidev.prototype.checkList.CheckList;
-import com.chidev.prototype.checkList.CheckListItem;
 import com.chidev.prototype.checkList.CheckListItemAdapter;
 
 /**
@@ -139,7 +135,7 @@ public class ItemFragment extends Fragment {
     private CheckListItemAdapter.CheckListItemViewHolder currentItemHolder;
 
     public void currentlySelectedItem(CheckListItemAdapter.CheckListItemViewHolder holder) {
-        if (currentItemHolder != null) {
+        if (currentItemHolder != null && currentItemHolder.position != holder.position) {
             currentItemHolder.editModeOff();
         }
         currentItemHolder = holder;
@@ -172,7 +168,9 @@ public class ItemFragment extends Fragment {
         if (view.getTag() != null) {
             CheckListItemAdapter.CheckListItemViewHolder holder =
                     (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
+            holder.editModeOff();
             ((ListActivity) getActivity()).removeItem(holder.position);
+            currentItemHolder = null;
             mAdapter.notifyDataSetChanged();
         }
     }

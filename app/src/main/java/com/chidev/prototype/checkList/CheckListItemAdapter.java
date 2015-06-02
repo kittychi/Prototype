@@ -53,11 +53,14 @@ public class CheckListItemAdapter extends ArrayAdapter {
         public void editModeOn() {
             editLayout.setVisibility(View.VISIBLE);
             titleText.setVisibility(View.GONE);
+            Log.d("ViewHolderOn", "titleText " + titleText.getText() + " turned on edit view");
         }
 
         public void editModeOff() {
             editLayout.setVisibility(View.GONE);
             titleText.setVisibility(View.VISIBLE);
+
+            Log.d("ViewHolderOff", "titleText " + titleText.getText() + " turned off edit view");
         }
 
         public void strikeItem(boolean strike) {
@@ -126,6 +129,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
         } else {
             viewToUse = convertView;
             holder = (CheckListItemViewHolder) viewToUse.getTag();
+            holder.editText.setText(item.getItem());
         }
 
         holder.titleText.setText(item.getItem());
@@ -162,7 +166,7 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            Log.v(TAG + "SingleUp", "Single tap up " + getItem(itemHolder.position));
+            Log.v(TAG + "SingleUp", "Single tap up " + getItem(itemHolder.position).getItem());
             if (itemHolder.editLayout.getVisibility() == View.GONE) {
                 itemHolder.editModeOn();
                 mFragment.currentlySelectedItem(itemHolder);
