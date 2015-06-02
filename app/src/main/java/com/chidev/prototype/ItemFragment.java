@@ -26,7 +26,7 @@ import com.chidev.prototype.checkList.CheckListItemAdapter;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class ItemFragment extends Fragment implements AbsListView.OnItemLongClickListener {
+public class ItemFragment extends Fragment {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String CHECK_LIST_NAME = "checkListName";
@@ -43,8 +43,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
      * Views.
      */
     private ArrayAdapter mAdapter;
-
-    private CheckList checkList;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -70,7 +68,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
             String checkListName = getArguments().getString(CHECK_LIST_NAME);
 
             // use the checklist name to get items on list
-            checkList = getArguments().getParcelable(checkListName);
+            CheckList checkList = getArguments().getParcelable(checkListName);
 
             mAdapter = new CheckListItemAdapter(getActivity(), checkList.getItems(), this);
 
@@ -87,8 +85,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
 
-        // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemLongClickListener(this);
         return view;
     }
 
@@ -109,26 +105,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
         mListener = null;
     }
 
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (view instanceof LinearLayout && null != mListener) {
-            Log.d("OnItemLongClick", "Long Click detected!");
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            CheckListItem item = this.checkList.get(position);
-            mListener.onFragmentInteraction("detail", item.getItem(), position);
-            return true;
-        }
-        return false;
-    }
-
     public ArrayAdapter getAdapter() {
         return mAdapter;
-    }
-
-    public void updateItemAt(int position, CheckListItem item) {
-        checkList.set(position, item);
     }
 
     /**
@@ -158,9 +136,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
         void onFragmentInteraction(String interactionType, String itemDescription, int position);
     }
 
+    private CheckListItemAdapter.CheckListItemViewHolder currentItemHolder;
+
+    public void currentlySelectedItem(CheckListItemAdapter.CheckListItemViewHolder holder) {
+        if (currentItemHolder != null) {
+            currentItemHolder.editModeOff();
+        }
+        currentItemHolder = holder;
+    }
+
     public void saveItemOnClickHandler(View view) {
         if (view.getTag() != null) {
-            CheckListItemAdapter.CheckListItemViewHolder holder = (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
+            CheckListItemAdapter.CheckListItemViewHolder holder =
+                    (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
 
             String newDescription = holder.editText.getText().toString();
 
@@ -172,15 +160,18 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemLongClic
 
     public void cancelItemOnClickHandler(View view) {
         if (view.getTag() != null) {
-            CheckListItemAdapter.CheckListItemViewHolder holder = (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
+            CheckListItemAdapter.CheckListItemViewHolder holder =
+                    (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
             holder.editText.setText(holder.titleText.getText().toString());
             holder.editModeOff();
+            currentItemHolder = null;
         }
     }
 
     public void deleteItemOnClickHandler(View view) {
         if (view.getTag() != null) {
-            CheckListItemAdapter.CheckListItemViewHolder holder = (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
+            CheckListItemAdapter.CheckListItemViewHolder holder =
+                    (CheckListItemAdapter.CheckListItemViewHolder) view.getTag();
             ((ListActivity) getActivity()).removeItem(holder.position);
             mAdapter.notifyDataSetChanged();
         }

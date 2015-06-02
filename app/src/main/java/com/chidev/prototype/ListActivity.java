@@ -16,6 +16,8 @@ import com.chidev.prototype.checkList.CheckList;
 import com.chidev.prototype.checkList.CheckListItem;
 import com.chidev.prototype.checkList.CheckListItemAdapter;
 
+import java.util.Objects;
+
 
 public class ListActivity extends ActionBarActivity implements ItemFragment.OnFragmentInteractionListener {
 
@@ -61,7 +63,7 @@ public class ListActivity extends ActionBarActivity implements ItemFragment.OnFr
     protected void onResume() {
         super.onResume();
 
-        if (unsubmittedText != "") {
+        if (!Objects.equals(unsubmittedText, "")) {
             EditText editText = (EditText) findViewById(R.id.edit_message);
             editText.setText(unsubmittedText);
             unsubmittedText = "";

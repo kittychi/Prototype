@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class CheckListItemAdapter extends ArrayAdapter {
     private Context context;
-    ArrayList<CheckListItem> items;
+    ArrayList items;
     ItemFragment mFragment;
 
     public CheckListItemAdapter(Context context, List items, ItemFragment fragment) {
@@ -107,17 +107,16 @@ public class CheckListItemAdapter extends ArrayAdapter {
                 holder.editLayout.setVisibility(View.GONE);
 
             } else viewToUse = mInflater.inflate(R.layout.checklist_grid_item, null);
+
             holder.position = position;
             holder.titleText = (TextView)viewToUse.findViewById(R.id.titleTextView);
             holder.itemContainer = (LinearLayout) viewToUse.findViewById(R.id.item_container);
-            holder.mDetector = new GestureDetectorCompat(context, new ItemOnGestureListener(context, convertView, holder, position));
+            holder.mDetector = new GestureDetectorCompat(context, new ItemOnGestureListener(holder, position));
 
             holder.itemContainer.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    boolean retVal = holder.mDetector.onTouchEvent(event);
-//                    Log.d("TouchListener", "item " + items.get(position).getItem() +  " is " + items.get(position).getStatus().name());
-                    return retVal;
+                    return holder.mDetector.onTouchEvent(event);
                 }
             });
             boolean completed = item.getStatus() != CheckListItem.ItemStatus.INCOMPLETE;
@@ -137,9 +136,10 @@ public class CheckListItemAdapter extends ArrayAdapter {
         items = checkList;
     }
 
+
     @Override
     public CheckListItem getItem(int position) {
-        return items.get(position);
+        return (CheckListItem) items.get(position);
     }
 
     public class ItemOnGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -149,12 +149,10 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
         int position;
         final String TAG = "GestureListener";
-        Context context;
 
-        public ItemOnGestureListener(Context ctx, View convertView, CheckListItemAdapter.CheckListItemViewHolder holder, int position) {
+        public ItemOnGestureListener(CheckListItemAdapter.CheckListItemViewHolder holder, int position) {
             itemHolder = holder;
             this.position = position;
-            context = ctx;
         }
 
         @Override
@@ -164,9 +162,10 @@ public class CheckListItemAdapter extends ArrayAdapter {
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            Log.v("TAG", "Single tap up " + getItem(itemHolder.position));
+            Log.v(TAG + "SingleUp", "Single tap up " + getItem(itemHolder.position));
             if (itemHolder.editLayout.getVisibility() == View.GONE) {
                 itemHolder.editModeOn();
+                mFragment.currentlySelectedItem(itemHolder);
                 return true;
             }
             return false;
@@ -179,8 +178,8 @@ public class CheckListItemAdapter extends ArrayAdapter {
             boolean completed;
             if (Math.abs(diffX) > MIN_DISTANCE) {
                 completed = diffX > 0;
-                Log.d("OnFling", "completed " + completed);
-                Log.d("OnFling", "item " + itemHolder.titleText.getText().toString());
+                Log.d(TAG + "OnFling", "completed " + completed);
+                Log.d(TAG + "OnFling", "item " + itemHolder.titleText.getText().toString());
                 ((ListActivity) mFragment.getActivity()).itemOnFlingHandler(completed, position);
                 itemHolder.strikeItem(completed);
                 return true;
